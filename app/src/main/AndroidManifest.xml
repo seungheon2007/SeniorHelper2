@@ -4,8 +4,11 @@
     package="personal.shlee.seniorhelper2">
 
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
+        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,6 +18,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SeniorHelper2"
         tools:targetApi="31">
+        <service
+            android:name=".PhoneFinderService"
+            android:enabled="true"
+            android:exported="true"></service>
+
         <receiver
             android:name=".SmsReceiver"
             android:enabled="true"

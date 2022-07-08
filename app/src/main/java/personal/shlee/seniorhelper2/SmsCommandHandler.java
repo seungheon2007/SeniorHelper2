@@ -1,18 +1,32 @@
 package personal.shlee.seniorhelper2;
 
+import static personal.shlee.seniorhelper2.PhoneFinderService.startPhoneFinderService;
+
+import android.content.Intent;
 import android.util.Log;
+
+import androidx.core.content.ContextCompat;
 
 /**
  * SMS message handler will react for 2 commands. One is 'Play', the other is 'Reset'.
  * SMS text message '0000' will act as 'Play' command.
  * When 'Play' command come, it will make 'Status' to the next level.
  * I plan to make 5 levels of status like below.
- *         LEVEL_00, // ready
- *         LEVEL_01, // level 01 : vibrator on with default intensity repeatedly
- *         LEVEL_02, // level 02 : media player play sound with volume 1/3 (low volume)
- *         LEVEL_03, // level 03 : media player play sound with volume 2/3 (medium volume)
- *         LEVEL_04, // level 04 : media player play sound with volume 3/3 (max volume)
- * As an first implementation, I'll just implement status changes by SMS message first.
+ *   - LEVEL_00, // ready
+ *   - LEVEL_01, // level 01 : vibrator on with default intensity repeatedly
+ *   - LEVEL_02, // level 02 : media player play sound with volume 1/3 (low volume)
+ *   - LEVEL_03, // level 03 : media player play sound with volume 2/3 (medium volume)
+ *   - LEVEL_04, // level 04 : media player play sound with volume 3/3 (max volume)
+ * For example, it's first 'Status' will be 'LEVEL_00', and it means 'ready' status.
+ * In 'ready' status, no actions will be made by this handler.
+ * But, if '0000' text message comes, it's status will be increased to the next level 'LEVEL_01'.
+ * 'LEVEL_01' means 'vibrator' will be started with default intensity repeatedly.
+ * If next '0000' comes, it's status will go to next level 'LEVEL_02', and it will start sound with
+ * volume level 1/3 of max volume, and so on...
+ * In any status, it'll be reset if 'Reset' command comes.
+ * SMS text message 'xxxx' will act as 'Reset' command. When reset command comes, status will go to
+ * 'LEVEL_00', which means that vibrator will be off and media sound will be stopped as well.
+ * Now, sound is not implemented yet.
  */
 public class SmsCommandHandler {
     /**
@@ -86,6 +100,7 @@ public class SmsCommandHandler {
 
         if (cmd == Commands.RESET) {
             Log.d(TAG, "SmsCommandHandler.handleCommand : "+cmd.toString()+" COMMAND RECEIVED!");
+            startPhoneFinderService("STOP", "Screaming stopped!");
             reset();
             return;
         }
@@ -96,6 +111,7 @@ public class SmsCommandHandler {
                 case LEVEL_00:
                     //TODO: vibrator start
                     setStatus(Status.LEVEL_01);
+                    startPhoneFinderService("PLAY", "Screaming started!");
                     break;
                 case LEVEL_01:
                     //TODO: media manager play with low volume
