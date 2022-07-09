@@ -26,9 +26,15 @@ import androidx.core.content.ContextCompat;
  * In any status, it'll be reset if 'Reset' command comes.
  * SMS text message 'xxxx' will act as 'Reset' command. When reset command comes, status will go to
  * 'LEVEL_00', which means that vibrator will be off and media sound will be stopped as well.
- * Now, sound is not implemented yet.
  */
 public class SmsCommandHandler {
+    private static final String TAG = "SeniorHelper";
+
+    private static Status status = Status.LEVEL_00;
+    private static boolean isInitialized = false;
+    private static int SOUND_VOLUME_SYSTEM_DEFAULT;
+    private static int SOUND_VOLUME_MAX;
+
     /**
      * 'Commands' enum is defined for matching enum number with String command
      *
@@ -55,12 +61,13 @@ public class SmsCommandHandler {
         LEVEL_03, // level 03 : media player play sound with volume 2/3 (medium volume)
         LEVEL_04, // level 04 : media player play sound with volume 3/3 (max volume)
     }
-    private static Status status = Status.LEVEL_00;
-    private static boolean isInitialized = false;
-    private static final String TAG = "SeniorHelper";
 
     private static void init() {
         if (!isInitialized) {
+            // keep system volume values to be used for getting it back to original
+            SOUND_VOLUME_SYSTEM_DEFAULT = MediaManager.getSystemDefaultSoundVolume();
+            SOUND_VOLUME_MAX = MediaManager.getSystemMaxSoundVolume();
+
             // init status
             status = Status.LEVEL_00;
 
@@ -101,6 +108,8 @@ public class SmsCommandHandler {
         if (cmd == Commands.RESET) {
             Log.d(TAG, "SmsCommandHandler.handleCommand : "+cmd.toString()+" COMMAND RECEIVED!");
             startPhoneFinderService("STOP", "Screaming stopped!");
+            MediaManager.stopSound();
+            MediaManager.setSoundVolume(SOUND_VOLUME_SYSTEM_DEFAULT);
             reset();
             return;
         }
@@ -114,15 +123,19 @@ public class SmsCommandHandler {
                     startPhoneFinderService("PLAY", "Screaming started!");
                     break;
                 case LEVEL_01:
-                    //TODO: media manager play with low volume
+                    // media manager play with low volume
+                    MediaManager.setSoundVolume(1* SOUND_VOLUME_MAX /3);
+                    MediaManager.startSound();
                     setStatus(Status.LEVEL_02);
                     break;
                 case LEVEL_02:
-                    //TODO: media manager set volume to medium
+                    // media manager set volume to medium
+                    MediaManager.setSoundVolume(2* SOUND_VOLUME_MAX /3);
                     setStatus(Status.LEVEL_03);
                     break;
                 case LEVEL_03:
-                    //TODO: media manager set volume to max
+                    // media manager set volume to max
+                    MediaManager.setSoundVolume(3* SOUND_VOLUME_MAX /3);
                     setStatus(Status.LEVEL_04);
                     break;
                 case LEVEL_04:
