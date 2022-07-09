@@ -82,7 +82,9 @@ public class SmsCommandHandler {
         if (!isInitialized) {
             return;
         }
-
+        startPhoneFinderService("STOP", "Screaming stopped!");
+        MediaManager.stopSound();
+        MediaManager.setSoundVolume(SOUND_VOLUME_SYSTEM_DEFAULT);
         setStatus(Status.LEVEL_00);
     }
 
@@ -107,9 +109,6 @@ public class SmsCommandHandler {
 
         if (cmd == Commands.RESET) {
             Log.d(TAG, "SmsCommandHandler.handleCommand : "+cmd.toString()+" COMMAND RECEIVED!");
-            startPhoneFinderService("STOP", "Screaming stopped!");
-            MediaManager.stopSound();
-            MediaManager.setSoundVolume(SOUND_VOLUME_SYSTEM_DEFAULT);
             reset();
             return;
         }
